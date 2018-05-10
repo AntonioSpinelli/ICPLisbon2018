@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: "icplisbon2018-service"
+  name: "ICPLisbon2018-service"
 spec:
   # if your cluster supports it, uncomment the following to automatically create
   # an external load-balanced IP for the frontend service.
@@ -15,12 +15,12 @@ spec:
     port: 9443
 
   selector:
-    app: "icplisbon2018-selector"
+    app: "ICPLisbon2018-selector"
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: "icplisbon2018-deployment"
+  name: "ICPLisbon2018-deployment"
 spec:
   # this replicas value is default
   # modify it according to your case
@@ -28,11 +28,11 @@ spec:
   template:
     metadata:
       labels:
-        app: "icplisbon2018-selector"
+        app: "ICPLisbon2018-selector"
     spec:
       containers:
-      - name: icplisbon2018
-        image: icplisbon2018:latest
+      - name: ICPLisbon2018
+        image: ICPLisbon2018:latest
         readinessProbe:
           httpGet:
             path: /ICPLisbon2018/health
@@ -41,4 +41,40 @@ spec:
         # resources:
         #   requests:
         #     cpu: 100m
-        #     memory: 100Mi
+        #     memory: 100Mivolumes:
+#KLP Next section Added for MSBuilder Fabric and ELK Stack
+        env:
+          - name: MB_KEYSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mb-keystore-password
+                key: password
+          - name: MB_TRUSTSTORE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mb-truststore-password
+                key: password
+        volumeMounts:
+          - name: keystores
+            mountPath: /etc/wlp/config/keystore
+            readOnly: true
+          - name: truststores
+            mountPath: /etc/wlp/config/truststore
+            readOnly: true
+          - name: liberty-config
+            mountPath: /config/configDropins
+      volumes:
+        - name: keystores
+          secret:
+            secretName: mb-keystore
+        - name: truststores
+          secret:
+            secretName: mb-truststore
+        - name: liberty-config
+          configMap:
+            name: liberty-logging-config
+            items:
+              - key: keystore.xml
+                path: defaults/keystore.xml
+              - key: logging.xml
+                path: defaults/logging.xml

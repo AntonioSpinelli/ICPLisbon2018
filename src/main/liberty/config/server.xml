@@ -3,6 +3,7 @@
   <featureManager>
       <feature>microprofile-1.0</feature>
       <feature>jndi-1.0</feature>
+      <feature>logstashCollector-1.0</feature>s
   </featureManager>
 
   <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
